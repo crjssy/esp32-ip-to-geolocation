@@ -9,8 +9,8 @@
 #include "esp_netif.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
+#include "sdkconfig.h"
 
-#define WIFI_SSID "Wokwi-GUEST" // Open access point, no password required
 #define TAG "GEOLOCATION"
 #define URL "http://ip-api.com/json"
 
@@ -48,9 +48,9 @@ void wifi_init_sta(void) {
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = WIFI_SSID,
-            .password = "",
-            .threshold.authmode = WIFI_AUTH_OPEN,
+            .ssid = CONFIG_WIFI_SSID,
+            .password = CONFIG_WIFI_PASSWORD,
+            .threshold.authmode = CONFIG_WIFI_AUTH_MODE,
         },
     };
 
@@ -63,59 +63,12 @@ void wifi_init_sta(void) {
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s", WIFI_SSID);
+        ESP_LOGI(TAG, "connected to ap SSID:%s", CONFIG_WIFI_SSID);
     } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s", WIFI_SSID);
+        ESP_LOGI(TAG, "Failed to connect to SSID:%s", CONFIG_WIFI_SSID);
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
-}
-
-esp_err_t http_event_handler(esp_http_client_event_t *evt) {
-    switch (evt->event_id) {
-        case HTTP_EVENT_ON_DATA:
-            if (!esp_http_client_is_chunked_response(evt->client)) {
-                cJSON *json = cJSON_Parse(evt->data);
-                if (json == NULL) {
-                    ESP_LOGE(TAG, "JSON parsing error");
-                    break;
-                }
-
-                cJSON *json_item = json->child;
-                while (json_item) {
-                    ESP_LOGI(TAG, "%s: %s", json_item->string, cJSON_GetStringValue(json_item));
-                    json_item = json_item->next;
-                }
-
-                cJSON_Delete(json);
-            }
-            break;
-        default:
-            break;
-    }
-    return ESP_OK;
-}
-
-void http_get_task(void *pvParameters) {
-    esp_http_client_config_t config = {
-        .url = URL,
-        .event_handler = http_event_handler,
-        .method = HTTP_METHOD_POST
-    };
-
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_err_t err = esp_http_client_perform(client);
-
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %d",
-                 esp_http_client_get_status_code(client),
-                 esp_http_client_get_content_length(client));
-    } else {
-        ESP_LOGE(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
-    }
-
-    esp_http_client_cleanup(client);
-    vTaskDelete(NULL);
 }
 
 void app_main() {
