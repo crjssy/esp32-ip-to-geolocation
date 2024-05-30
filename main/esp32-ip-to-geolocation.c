@@ -5,7 +5,7 @@ EventGroupHandle_t s_wifi_event_group;
 const int WIFI_CONNECTED_BIT = BIT0;
 const int WIFI_FAIL_BIT = BIT1;
 
-static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -115,7 +115,6 @@ void http_get_task(void *pvParameters) {
 
 
 void app_main() {
-    nvs_flash_init();
     wifi_init_sta();
     xTaskCreate(&http_get_task, "http_get_task", 8192, NULL, 5, NULL);
 }
