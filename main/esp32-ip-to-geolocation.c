@@ -1,19 +1,7 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_log.h"
-#include "esp_event.h"
-#include "nvs_flash.h"
-#include "esp_wifi.h"
-#include "esp_netif.h"
-#include "esp_http_client.h"
-#include "cJSON.h"
-#include "sdkconfig.h"
+#include "main.h"
 
-#define TAG "GEOLOCATION"
-#define URL "http://ip-api.com/json"
-
-static EventGroupHandle_t s_wifi_event_group;
+// Global event group for WiFi status
+EventGroupHandle_t s_wifi_event_group;
 const int WIFI_CONNECTED_BIT = BIT0;
 const int WIFI_FAIL_BIT = BIT1;
 
@@ -26,7 +14,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
         xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa(&event->ip_info.ip));
+        ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa((ip4_addr_t*)&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
