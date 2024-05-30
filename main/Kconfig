@@ -1,0 +1,27 @@
+menu "WiFi Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "Wokwi-GUEST"
+        help
+            Specify the WiFi SSID to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default ""
+        help
+            Specify the WiFi password.
+
+    config WIFI_AUTH_MODE
+        hex "WiFi Authentication Mode"
+        default 0
+        help
+            Specify the authentication mode:
+            0 - WIFI_AUTH_OPEN
+            1 - WIFI_AUTH_WEP
+            2 - WIFI_AUTH_WPA_PSK
+            3 - WIFI_AUTH_WPA2_PSK
+            4 - WIFI_AUTH_WPA_WPA2_PSK
+            5 - WIFI_AUTH_WPA2_ENTERPRISE
+
+endmenu
