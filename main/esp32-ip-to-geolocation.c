@@ -58,6 +58,62 @@ void wifi_init_sta(void) {
     }
 }
 
+esp_err_t http_event_handler(esp_http_client_event_t *evt) {
+    switch (evt->event_id) {
+        case HTTP_EVENT_ON_DATA:
+            if (!esp_http_client_is_chunked_response(evt->client)) {
+                cJSON *json = cJSON_Parse(evt->data);
+                if (json == NULL) {
+                    ESP_LOGE(TAG, "JSON parsing error");
+                    break;
+                }
+
+                const char *keys[] = {
+                    "status", "country", "countryCode", "region", "regionName", "city",
+                    "zip", "lat", "lon", "timezone", "isp", "org", "as", "query"
+                };
+                int numKeys = sizeof(keys) / sizeof(keys[0]);
+                for (int i = 0; i < numKeys; i++) {
+                    cJSON *value = cJSON_GetObjectItemCaseSensitive(json, keys[i]);
+                    if (cJSON_IsString(value) && (value->valuestring != NULL)) {
+                        ESP_LOGI(TAG, "%s: %s", keys[i], value->valuestring);
+                    } else if (cJSON_IsNumber(value)) {
+                        ESP_LOGI(TAG, "%s: %f", keys[i], value->valuedouble);
+                    }
+                }
+
+                cJSON_Delete(json);
+            }
+            break;
+        default:
+            break;
+    }
+    return ESP_OK;
+}
+
+void http_get_task(void *pvParameters) {
+    esp_http_client_config_t config = {
+        .url = URL,
+        .event_handler = http_event_handler,
+        .method = HTTP_METHOD_GET  // Ensure this matches the intended method
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
+                 esp_http_client_get_status_code(client),
+                 esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+    }
+
+    esp_http_client_cleanup(client);
+    vTaskDelete(NULL);
+}
+
+
 void app_main() {
     nvs_flash_init();
     wifi_init_sta();
