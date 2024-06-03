@@ -27,7 +27,7 @@ jobs:
           - release-v5.0
           - release-v5.1
         target:
-          - esp32s3
+          - esp32
     runs-on: ubuntu-22.04
     container:
       image: espressif/idf:${{ matrix.idf-branch }}
