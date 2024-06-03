@@ -68,7 +68,7 @@ jobs:
           - release-v5.0
           - release-v5.1
         target:
-          - esp32s3
+          - esp32
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
