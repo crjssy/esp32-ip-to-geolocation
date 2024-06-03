@@ -81,11 +81,7 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
-        run: |
-          pip install \
-            pytest-embedded \
-            pytest-embedded-serial-esp \
-            pytest-embedded-idf
+        run: pip install -r requirements.txt
       - name: Run Test App in WokWi Simulator
         run: |
           pytest ${{ env.test_dirs }} \
