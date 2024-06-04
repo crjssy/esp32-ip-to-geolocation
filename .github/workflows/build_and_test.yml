@@ -37,6 +37,8 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
+      - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
+        run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
