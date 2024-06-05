@@ -47,6 +47,15 @@ jobs:
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: List the files in the build directory
         run: ls build_${{ matrix.target }}_${{ matrix.idf-branch }}
+      - name: Check if sdkconfig.json exists
+        run: |
+          if [ -f build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json ]; then
+            echo "sdkconfig.json found"
+            cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json
+          else
+            echo "sdkconfig.json not found"
+            exit 1
+          fi
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
