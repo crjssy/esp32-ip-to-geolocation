@@ -45,6 +45,8 @@ jobs:
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+      -name: ls the file in the build directory
+       run: ls
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
