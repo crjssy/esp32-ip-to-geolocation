@@ -47,6 +47,10 @@ jobs:
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: List all files in the current directory
         run: ls -R
+      - name: List build directory
+        run: |
+          echo "Listing build directory for target ${{ matrix.target }} and branch ${{ matrix.idf-branch }}"
+          ls -R build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
