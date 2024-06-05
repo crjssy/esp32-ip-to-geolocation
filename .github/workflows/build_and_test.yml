@@ -47,6 +47,8 @@ jobs:
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: List all files in the current directory
         run: ls -R
+      - name: Check build log
+        run: cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/build.log
       - name: List build directory
         run: |
           echo "Listing build directory for target ${{ matrix.target }} and branch ${{ matrix.idf-branch }}"
