@@ -44,15 +44,11 @@ jobs:
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: List all files in the current directory
-        run: ls -R
-      - name: Check build log
-        run: cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/build.log
-      - name: List build directory
-        run: |
-          echo "Listing build directory for target ${{ matrix.target }} and branch ${{ matrix.idf-branch }}"
-          ls -R build_${{ matrix.target }}_${{ matrix.idf-branch }}
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} > build_output.log 2>&1
+      - name: Output build log
+        run: cat build_output.log
+      - name: Find all generated files
+        run: find . -type f -print
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
