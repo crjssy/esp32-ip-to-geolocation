@@ -45,16 +45,19 @@ jobs:
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+      - name: Verify build output
+        run: |
+          ls -l build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            **/build**/bootloader/bootloader.bin
-            **/build**/partition_table/partition-table.bin
-            **/build**/*.bin
-            **/build**/*.elf
-            **/build**/flasher_args.json
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/bootloader/bootloader.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/partition_table/partition-table.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.elf
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
