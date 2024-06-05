@@ -40,15 +40,24 @@ jobs:
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
+          echo "Starting build process..."
           idf-build-apps build \
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} > build_output.log 2>&1
       - name: Output build log
-        run: cat build_output.log
-      - name: Find all generated files
-        run: find . -type f -print
+        run: |
+          echo "Build output log:"
+          cat build_output.log
+      - name: List all files in the current directory
+        run: |
+          echo "Listing all files in the current directory:"
+          find . -type f -print
+      - name: List build directory
+        run: |
+          echo "Listing build directory for target ${{ matrix.target }} and branch ${{ matrix.idf-branch }}"
+          ls -R build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
