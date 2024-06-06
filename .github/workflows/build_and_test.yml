@@ -76,7 +76,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Ensure this matches the Python version needed for your testing
+          python-version: '3.9'  # Ensure this matches the Python version needed for your  testing
       - name: Download built binaries from build job
         uses: actions/download-artifact@v2
         with:
