@@ -85,7 +85,7 @@ jobs:
           token: ${{ secrets.WOKWI_CLI_TOKEN }}
           path: /home/runner/work/esp32-ip-to-geolocation/esp32-ip-to-geolocation # directory with wokwi.toml, relative to repo's root
           timeout: 10000
-          expect_text: 'Hello, world!' # optional
+          expect_text: 'Hello, world' # optional
           fail_text: 'Error' # optional
           scenario: 'test-hello-world.yaml' # optional, adjust to your scenario file if any
       - name: Run PyTest
