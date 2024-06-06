@@ -76,7 +76,6 @@ jobs:
           if [ ! -f build/esp32-ip-to-geolocation.elf ]; then
             echo "Error: build/esp32-ip-to-geolocation.elf not found!"
             exit 1
-          fi
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
@@ -123,7 +122,7 @@ jobs:
             exit 1
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
+      - name: Set WokWi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
       - name: Run Test App in WokWi Simulator
         run: |
@@ -139,7 +138,7 @@ jobs:
   publish-results:
     name: Publish Test App results
     needs: simulate-test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download Test results
         uses: actions/download-artifact@v3
