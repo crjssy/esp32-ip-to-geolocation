@@ -108,6 +108,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
+      - name: Verify downloaded files
+        run: |
+          if [ ! -f build/flasher_args.json ]; then
+            echo "Error: build/flasher_args.json not found!"
+            exit 1
+          fi
+          if [ ! -f build/esp32-ip-to-geolocation.elf ]; then
+            echo "Error: build/esp32-ip-to-geolocation.elf not found!"
+            exit 1
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
       - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
