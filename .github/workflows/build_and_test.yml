@@ -126,13 +126,19 @@ jobs:
         run: pip install -r requirements.txt
       - name: Set WokWi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
-      - name: Run Test App in WokWi Simulator
+      - name: Install wokwi-cli and run tests
         run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -fsSL https://raw.githubusercontent.com/wokwi/wokwi-cli/main/install.sh | sudo bash
+          wokwi-cli --version
+          wokwi-cli --interactive . --timeout 10000
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
-      - uses: actions/upload-artifact@v3
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
         with:
           name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
           path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
