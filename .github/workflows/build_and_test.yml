@@ -81,7 +81,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install wokwi-cli
         run: |
-          wget -q -O /usr/local/bin/wokwi-cli https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-linux-x64
+          curl -L -o /usr/local/bin/wokwi-cli https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-linux-x64
           chmod +x /usr/local/bin/wokwi-cli
       - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
