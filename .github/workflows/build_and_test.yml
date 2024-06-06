@@ -83,18 +83,12 @@ jobs:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Run Test App in WokWi Simulator with retry
-        id: run-wokwi
-        run: |
-          RETRIES=3
-          TIMEOUT=60000
-          for i in $(seq 1 $RETRIES); do
-            wokwi-cli --timeout $TIMEOUT --token ${{ secrets.WOKWI_CLI_TOKEN }} --project . && break || sleep 5
-            if [ $i -eq $RETRIES ]; then
-              echo "Simulation failed after $RETRIES attempts."
-              exit 1
-            fi
-          done
+      - name: Run Test App in WokWi Simulator
+        uses: wokwi/wokwi-ci-action@v1
+        with:
+          token: ${{ secrets.WOKWI_CLI_TOKEN}}
+          path: /
+          timeout: 60000
       - name: Run PyTest
         run: |
           pytest ${{ env.test_dirs }} \
