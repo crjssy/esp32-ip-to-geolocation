@@ -82,11 +82,11 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            build/bootloader/bootloader.bin
-            build/partition_table/partition-table.bin
-            build/*.bin
-            build/*.elf
-            build/flasher_args.json
+          **/build**/bootloader/bootloader.bin
+          **/build**/partition_table/partition-table.bin
+          **/build**/*.bin
+          **/build**/*.elf
+          **/build**/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
