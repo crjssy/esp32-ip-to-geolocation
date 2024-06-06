@@ -11,7 +11,7 @@ on:
 
 env:
   IDF_PATH: /opt/esp/idf
-  test_dirs: components/button/test_apps
+  test_dirs: .
 
 defaults:
   run:
