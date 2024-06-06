@@ -79,22 +79,15 @@ jobs:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Test with Wokwi
+        uses: wokwi/wokwi-ci-action@v1
         with:
-          node-version: '16'
-      - name: Install Wokwi CLI
+          token: ${{ secrets.WOKWI_CLI_TOKEN }}
+          path: /home/runner/work/esp32-ip-to-geolocation/esp32-ip-to-geolocation # directory with wokwi.toml, relative to repo's root
+          timeout: 10000
+          scenario: 'test-hello-world.yaml' # optional, see below
+      - name: Run PyTest
         run: |
-          git clone https://github.com/wokwi/wokwi-cli.git
-          cd wokwi-cli
-          npm install
-          npm link
-          echo "::add-path::$(npm bin -g)"
-      - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
-        run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
-      - name: Run Test App in WokWi Simulator
-        run: |
-          wokwi-cli --interactive ../${{ env.test_dirs }} --timeout 86400000 &
           pytest ../${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
