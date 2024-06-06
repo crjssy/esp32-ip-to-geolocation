@@ -50,7 +50,7 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           echo "Starting build process..."
-          idf.py build > build_output.log 2>&1 || (echo "Build failed, printing log:" && cat build_output.log && exit 1)
+          idf.py build > build_output.log 2>&1
       - name: Output build log
         run: |
           echo "Build output log:"
@@ -108,12 +108,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: List downloaded files
-        run: |
-          echo "Listing downloaded files:"
-          find . -type f -print
       - name: Install Python packages for PyTest
-        run: pip install -r tools/requirements/requirement.pytest.txt
+        run: pip install -r requirements.txt
       - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
       - name: Run Test App in WokWi Simulator
