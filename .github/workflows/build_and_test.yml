@@ -11,7 +11,7 @@ on:
 
 env:
   IDF_PATH: /opt/esp/idf
-  test_dirs: .
+  test_dirs: components/button/test_apps
 
 defaults:
   run:
@@ -32,28 +32,45 @@ jobs:
     container:
       image: espressif/idf:${{ matrix.idf-branch }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Install Python Dependencies
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
+      - name: Confirm IDF Path
+        run: |
+          echo "IDF_PATH is set to: $IDF_PATH"
+          ls -l $IDF_PATH
+      - name: Export IDF
+        run: |
+          . $IDF_PATH/export.sh
+          echo "IDF exported successfully"
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
-          idf-build-apps build \
-            -p ${{ env.test_dirs }} \
-            --target ${{ matrix.target }} \
-            --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: List the files in the build directory
-        run: ls build_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: Check if sdkconfig.json exists
+          echo "Starting build process..."
+          idf.py build > build_output.log 2>&1 || (echo "Build failed, printing log:" && cat build_output.log && exit 1)
+      - name: Output build log
         run: |
-          if [ -f build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json ]; then
-            echo "sdkconfig.json found"
-            cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json
-          else
-            echo "sdkconfig.json not found"
+          echo "Build output log:"
+          cat build_output.log
+      - name: List all files in the current directory
+        run: |
+          echo "Listing all files in the current directory:"
+          find . -type f -print
+      - name: List build directory
+        run: |
+          echo "Listing build directory"
+          ls -R build
+      - name: Check for necessary files
+        run: |
+          if [ ! -f build/flasher_args.json ]; then
+            echo "Error: build/flasher_args.json not found!"
+            exit 1
+          fi
+          if [ ! -f build/esp32-ip-to-geolocation.elf ]; then
+            echo "Error: build/esp32-ip-to-geolocation.elf not found!"
             exit 1
           fi
       - name: Upload files to artifacts for run-target job
@@ -61,11 +78,11 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            **/build**/bootloader/bootloader.bin
-            **/build**/partition_table/partition-table.bin
-            **/build**/*.bin
-            **/build**/*.elf
-            **/build**/flasher_args.json
+            build/bootloader/bootloader.bin
+            build/partition_table/partition-table.bin
+            build/*.bin
+            build/*.elf
+            build/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
@@ -86,13 +103,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Ensure this matches the Python version needed for your testing
+          python-version: '3.9'
       - name: Download built binaries from build job
         uses: actions/download-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
+      - name: List downloaded files
+        run: |
+          echo "Listing downloaded files:"
+          find . -type f -print
       - name: Install Python packages for PyTest
-        run: pip install -r requirements.txt
+        run: pip install -r tools/requirements/requirement.pytest.txt
       - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
       - name: Run Test App in WokWi Simulator
