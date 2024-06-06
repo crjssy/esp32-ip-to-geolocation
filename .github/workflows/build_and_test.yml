@@ -37,7 +37,7 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
-        - name: Build Test Application with ESP-IDF
+      - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
           echo "Starting build process..."
