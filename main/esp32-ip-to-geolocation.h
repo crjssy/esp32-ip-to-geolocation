@@ -10,6 +10,7 @@
 #include "esp_wifi.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
+#include "nvs_flash.h"
 
 #ifdef __cplusplus
 extern "C" {
