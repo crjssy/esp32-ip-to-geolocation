@@ -121,6 +121,7 @@ jobs:
           if [ ! -f build/esp32-ip-to-geolocation.elf ]; then
             echo "Error: build/esp32-ip-to-geolocation.elf not found!"
             exit 1
+          fi
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
       - name: Set WokWi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
