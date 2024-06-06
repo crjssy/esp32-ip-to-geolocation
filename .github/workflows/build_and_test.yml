@@ -79,13 +79,21 @@ jobs:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Test with Wokwi
-        uses: wokwi/wokwi-ci-action@v1
-        with:
-          token: ${{ secrets.WOKWI_CLI_TOKEN }}
-          path: /home/runner/work/esp32-ip-to-geolocation/esp32-ip-to-geolocation # directory with wokwi.toml, relative to repo's root
-          timeout: 10000
-          scenario: 'test-hello-world.yaml' # optional, see below
+      - name: Install wokwi-cli
+        run: |
+          wget -q -O /usr/local/bin/wokwi-cli https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-linux-x64
+          chmod +x /usr/local/bin/wokwi-cli
+      - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
+        run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
+      - name: Run Wokwi Simulation Test
+        env:
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+          CI_EXPECT_TEXT: "Hello, world!"
+          CI_FAIL_TEXT: "Error"
+        run: |
+          wokwi-cli --timeout "10000" --expect-text "$CI_EXPECT_TEXT" \
+            --fail-text "$CI_FAIL_TEXT" --scenario "test-hello-world.yaml" \
+            "${GITHUB_WORKSPACE}/path/to/project" --serial-log-file ""
       - name: Run PyTest
         run: |
           pytest ../${{ env.test_dirs }} \
