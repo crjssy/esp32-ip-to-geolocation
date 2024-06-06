@@ -80,7 +80,7 @@ jobs:
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
       - name: Install Wokwi CLI
-        run: npm install -g @wokwi/cli
+        run: pip install wokwi-cli
       - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
         run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
       - name: Run Test App in WokWi Simulator
