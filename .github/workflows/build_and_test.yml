@@ -40,8 +40,11 @@ jobs:
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
-          echo "Starting build process..."
-          idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
+          idf-build-apps build \
+            -p ${{ env.test_dirs }} \
+            --target ${{ matrix.target }} \
+            --recursive \
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
@@ -79,16 +82,9 @@ jobs:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Test with Wokwi
-        uses: wokwi/wokwi-ci-action@v1
-        with:
-          token: ${{ secrets.WOKWI_CLI_TOKEN }}
-          path: /home/runner/work/esp32-ip-to-geolocation/esp32-ip-to-geolocation # directory with wokwi.toml, relative to repo's root
-          timeout: 10000
-          expect_text: 'Hello, world' # optional
-          fail_text: 'Error' # optional
-          scenario: 'test-hello-world.yaml' # optional, adjust to your scenario file if any
-      - name: Run PyTest
+      - name: Set Wokwi Token (GitHub environment secret `WOKWI_CLI_TOKEN`)
+        run: echo "WOKWI_CLI_TOKEN=${{ secrets.WOKWI_CLI_TOKEN }}" >> $GITHUB_ENV
+      - name: Run Test App in WokWi Simulator
         run: |
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
