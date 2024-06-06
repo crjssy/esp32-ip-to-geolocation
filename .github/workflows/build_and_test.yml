@@ -46,11 +46,10 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           echo "IDF exported successfully"
-      - name: Build Test Application with ESP-IDF
+      - name: Clean previous build files
         run: |
           . $IDF_PATH/export.sh
-          echo "Starting build process..."
-          idf.py build > build_output.log 2>&1
+          idf.py fullclean
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
