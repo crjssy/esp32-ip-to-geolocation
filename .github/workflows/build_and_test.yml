@@ -51,6 +51,11 @@ jobs:
           . $IDF_PATH/export.sh
           echo "Starting build process..."
           idf.py build > build_output.log 2>&1
+      - name: Build Test Application with ESP-IDF
+        run: |
+          . $IDF_PATH/export.sh
+          echo "Starting build process..."
+          idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Output build log
         run: |
           echo "Build output log:"
