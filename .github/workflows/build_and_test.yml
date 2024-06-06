@@ -76,25 +76,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Ensure this matches the Python version needed for your testing
+          python-version: '3.9'
       - name: Download built binaries from build job
         uses: actions/download-artifact@v2
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
-      - name: Run Test App in WokWi Simulator
-        uses: wokwi/wokwi-ci-action@v1
-        with:
-          token: ${{ secrets.WOKWI_CLI_TOKEN}}
-          path: /
-          timeout: 10000
+      - name: Run PyTest in WokWi Simulator
         run: |
+          wokwi-cli start --token ${{ secrets.WOKWI_CLI_TOKEN }} --path . --timeout 10000 &
+          sleep 5  # 确保模拟器有时间启动
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
-      - uses: actions/upload-artifact@v2
+      - name: Upload PyTest Results
+        uses: actions/upload-artifact@v2
         with:
           name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
           path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
