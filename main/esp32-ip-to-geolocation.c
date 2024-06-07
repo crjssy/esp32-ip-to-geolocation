@@ -1,25 +1,38 @@
 #include "esp32-ip-to-geolocation.h"
+#include <string.h>
+
+#define MAX_HTTP_OUTPUT_BUFFER 2048
+
+char *output_buffer; // Buffer to store HTTP response
+int output_len;      // Stores number of bytes in output_buffer
 
 // Global event group for WiFi status
 EventGroupHandle_t s_wifi_event_group;
 const int WIFI_CONNECTED_BIT = BIT0;
 const int WIFI_FAIL_BIT = BIT1;
 
-void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
         esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+    }
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
         esp_wifi_connect();
         ESP_LOGI(TAG, "retry to connect to the AP");
         xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa((ip4_addr_t*)&event->ip_info.ip));
+    }
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+        ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa((ip4_addr_t *)&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
 
-void wifi_init_sta(void) {
+void wifi_init_sta(void)
+{
     s_wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -49,75 +62,137 @@ void wifi_init_sta(void) {
 
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
 
-    if (bits & WIFI_CONNECTED_BIT) {
+    if (bits & WIFI_CONNECTED_BIT)
+    {
         ESP_LOGI(TAG, "connected to ap SSID:%s", CONFIG_WIFI_SSID);
-    } else if (bits & WIFI_FAIL_BIT) {
+    }
+    else if (bits & WIFI_FAIL_BIT)
+    {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s", CONFIG_WIFI_SSID);
-    } else {
+    }
+    else
+    {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
 }
 
-esp_err_t http_event_handler(esp_http_client_event_t *evt) {
-    switch (evt->event_id) {
-        case HTTP_EVENT_ON_DATA:
-            if (!esp_http_client_is_chunked_response(evt->client)) {
-                cJSON *json = cJSON_Parse(evt->data);
-                if (json == NULL) {
-                    ESP_LOGE(TAG, "JSON parsing error");
-                    break;
-                }
+esp_err_t http_event_handler(esp_http_client_event_t *evt)
+{
+    switch (evt->event_id)
+    {
+    case HTTP_EVENT_ERROR:
+        ESP_LOGI(TAG, "HTTP_EVENT_ERROR");
+        break;
+    case HTTP_EVENT_ON_CONNECTED:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_CONNECTED");
+        break;
+    case HTTP_EVENT_HEADER_SENT:
+        ESP_LOGI(TAG, "HTTP_EVENT_HEADER_SENT");
+        break;
+    case HTTP_EVENT_ON_HEADER:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+        break;
+    case HTTP_EVENT_ON_DATA:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+        if (evt->data_len > 0)
+        {
+            if (output_len + evt->data_len < MAX_HTTP_OUTPUT_BUFFER)
+            {
+                memcpy(output_buffer + output_len, evt->data, evt->data_len);
+                output_len += evt->data_len;
+            }
+            else
+            {
+                ESP_LOGE(TAG, "Buffer overflow");
+            }
+        }
+        break;
+    case HTTP_EVENT_ON_FINISH:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_FINISH");
+        if (output_buffer != NULL)
+        {
+            // Ensure the buffer is null-terminated
+            output_buffer[output_len] = '\0';
 
+            // Parse the JSON data
+            cJSON *json = cJSON_Parse(output_buffer);
+            if (json == NULL)
+            {
+                ESP_LOGE(TAG, "JSON parsing error");
+            }
+            else
+            {
                 const char *keys[] = {
                     "status", "country", "countryCode", "region", "regionName", "city",
-                    "zip", "lat", "lon", "timezone", "isp", "org", "as", "query"
-                };
+                    "zip", "lat", "lon", "timezone", "isp", "org", "as", "query"};
                 int numKeys = sizeof(keys) / sizeof(keys[0]);
-                for (int i = 0; i < numKeys; i++) {
+                for (int i = 0; i < numKeys; i++)
+                {
                     cJSON *value = cJSON_GetObjectItemCaseSensitive(json, keys[i]);
-                    if (cJSON_IsString(value) && (value->valuestring != NULL)) {
+                    if (cJSON_IsString(value) && (value->valuestring != NULL))
+                    {
                         ESP_LOGI(TAG, "%s: %s", keys[i], value->valuestring);
-                    } else if (cJSON_IsNumber(value)) {
+                    }
+                    else if (cJSON_IsNumber(value))
+                    {
                         ESP_LOGI(TAG, "%s: %f", keys[i], value->valuedouble);
                     }
                 }
 
                 cJSON_Delete(json);
             }
-            break;
-        default:
-            break;
+            // Reset the buffer
+            output_len = 0;
+        }
+        break;
+    case HTTP_EVENT_DISCONNECTED:
+        ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+        break;
     }
     return ESP_OK;
 }
 
-void http_get_task(void *pvParameters) {
+void http_get_task(void *pvParameters)
+{
+    output_buffer = (char *)malloc(MAX_HTTP_OUTPUT_BUFFER);
+    if (output_buffer == NULL)
+    {
+        ESP_LOGE(TAG, "Cannot malloc http receive buffer");
+        vTaskDelete(NULL);
+        return;
+    }
+    output_len = 0;
+
     esp_http_client_config_t config = {
         .url = URL,
         .event_handler = http_event_handler,
-        .method = HTTP_METHOD_GET  // Ensure this matches the intended method
+        .method = HTTP_METHOD_GET // Ensure this matches the intended method
     };
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
     esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK) {
+    if (err == ESP_OK)
+    {
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
                  esp_http_client_get_status_code(client),
                  esp_http_client_get_content_length(client));
-    } else {
+    }
+    else
+    {
         ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
 
     esp_http_client_cleanup(client);
+    free(output_buffer);
     vTaskDelete(NULL);
 }
 
-
-void app_main() {
-    
+void app_main()
+{
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
