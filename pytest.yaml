@@ -1,7 +1,8 @@
-# pytest.yaml
-timeout: 60000  # 超时时间（毫秒）
+name: Blinky test
+version: 1
+author: Uri Shaked
 
-commands:
+steps:
   - run: |
       pytest ${{ env.test_dirs }} \
         --embedded-services idf,wokwi \
