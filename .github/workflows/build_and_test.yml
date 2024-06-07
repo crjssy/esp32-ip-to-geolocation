@@ -89,7 +89,7 @@ jobs:
           token: ${{ secrets.WOKWI_CLI_TOKEN}}
           path: /
           timeout: 60000
-          exit-on: "GEOLOCATION: status: success"
+          exit-on: "GEOLOCATION: as: AS396982 Google LLC"
       - name: Run PyTest
         run: |
           pytest ${{ env.test_dirs }} \
