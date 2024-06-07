@@ -88,19 +88,8 @@ jobs:
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN}}
           path: /
-          timeout: 120000
-          exit-on: "GEOLOCATION: Test complete"
-      - name: Run PyTest
-        run: |
-          pytest ${{ env.test_dirs }} \
-            --embedded-services idf,wokwi \
-            --tb short \
-            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
-      - uses: actions/upload-artifact@v2
-        with:
-          name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
-          path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
-
+          timeout: 50000
+          scenario: 'pytest.yaml'
   publish-results:
     name: Publish Test App results
     needs: simulate-test
