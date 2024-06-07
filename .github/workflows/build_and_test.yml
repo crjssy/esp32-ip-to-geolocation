@@ -86,7 +86,7 @@ jobs:
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
       - name: Run Test App in Wokwi Simulation
-        working-directory: test_app
+        working-directory: main
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
         run: |
