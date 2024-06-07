@@ -90,6 +90,12 @@ jobs:
           path: /
           timeout: 50000
           scenario: 'pytest.yaml'
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
+          path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
+
   publish-results:
     name: Publish Test App results
     needs: simulate-test
