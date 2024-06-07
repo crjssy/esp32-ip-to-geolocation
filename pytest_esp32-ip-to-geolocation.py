@@ -13,10 +13,10 @@ Steps to run these cases:
 '''
 
 import pytest
-from pytest_embedded import Dut
+from pytest_embedded_idf.dut import IdfDut
 
 @pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
-def test_esp32_ip_to_geolocation(dut: Dut):
+def test_esp32_ip_to_geolocation(dut: IdfDut):
     # Start the test
     dut.expect_exact("wifi_init_sta finished.")
     dut.expect("connected to ap SSID:Wokwi-GUEST")
