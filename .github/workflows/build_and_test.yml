@@ -88,7 +88,7 @@ jobs:
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN}}
           path: /
-          timeout: 60000
+          timeout: 120000
       - name: Run PyTest
         run: |
           pytest ${{ env.test_dirs }} \
