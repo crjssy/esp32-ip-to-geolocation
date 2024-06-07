@@ -83,18 +83,18 @@ jobs:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install Python packages for PyTest
         run: pip install -r requirements.txt
+      - name: Run Test App in WokWi Simulator
+        uses: wokwi/wokwi-ci-action@v1
+        with:
+          token: ${{ secrets.WOKWI_CLI_TOKEN }}
+          path: /
+          timeout: 50000
       - name: Run PyTest
         run: |
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
-      - name: Run Test App in WokWi Simulator
-        uses: wokwi/wokwi-ci-action@v1
-        with:
-          token: ${{ secrets.WOKWI_CLI_TOKEN}}
-          path: /
-          timeout: 50000
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
         with:
