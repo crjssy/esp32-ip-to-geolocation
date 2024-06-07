@@ -148,6 +148,12 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
     case HTTP_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
         break;
+    case HTTP_EVENT_REDIRECT: // 添加对 HTTP_EVENT_REDIRECT 的处理
+        ESP_LOGI(TAG, "HTTP_EVENT_REDIRECT");
+        break;
+    default:
+        ESP_LOGI(TAG, "Unhandled HTTP event: %d", evt->event_id);
+        break;
     }
     return ESP_OK;
 }
