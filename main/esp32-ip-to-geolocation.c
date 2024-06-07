@@ -125,4 +125,5 @@ void app_main() {
 
     wifi_init_sta();
     xTaskCreate(&http_get_task, "http_get_task", 8192, NULL, 5, NULL);
+    esp_restart();
 }
