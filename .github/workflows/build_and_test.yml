@@ -87,6 +87,8 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: build_${{ matrix.target }}_${{ matrix.idf-branch }}
+      - name: Set environment variables
+        run: echo "BUILD_PATH=build_${{ matrix.target }}_${{ matrix.idf-branch }}" >> $GITHUB_ENV
       - name: Verify download output
         run: |
           ls build_${{ matrix.target }}_${{ matrix.idf-branch }}
