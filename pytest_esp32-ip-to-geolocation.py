@@ -12,11 +12,16 @@ Steps to run these cases:
   - pytest components/button/test_apps --target esp32
 '''
 
+import os
 import pytest
-from pytest_embedded import Dut
 
-@pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
+@pytest.mark.supported_targets("esp32")
 def test_esp32_ip_to_geolocation(dut: Dut):
+    # Check if the required files exist
+    assert os.path.exists('build/flasher_args.json'), "flasher_args.json doesn't exist"
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Files in build directory: {os.listdir('build')}")
+
     # Start the test
     dut.expect_exact("wifi_init_sta finished.")
     dut.expect("connected to ap SSID:Wokwi-GUEST")
@@ -48,3 +53,4 @@ def test_esp32_ip_to_geolocation(dut: Dut):
 
     # Optionally, check for completion of the HTTP task or any other specific logs
     dut.expect("HTTP request completed successfully")  # Modify based on actual log message on success
+
