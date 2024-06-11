@@ -37,11 +37,8 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
-      - name: Generate sdkconfig 
-        run: |
-          . $IDF_PATH/export.sh
-          idf.py menuconfig 
       - name: Build Test Application with ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
         run: |
           . $IDF_PATH/export.sh
           idf-build-apps build \
