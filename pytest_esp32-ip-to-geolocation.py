@@ -14,9 +14,15 @@ Steps to run these cases:
 
 import pytest
 from pytest_embedded import Dut
+from pathlib import Path
 
 @pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
 def test_esp32_ip_to_geolocation(dut: Dut):
+    # Check if the required files exist
+    flasher_args_path = Path('build_esp32_release-v5.0/flasher_args.json')
+    assert flasher_args_path.exists(), "flasher_args.json doesn't exist"
+    print(f"flasher_args.json found at: {flasher_args_path}")
+
     # Start the test
     dut.expect_exact("wifi_init_sta finished.")
     dut.expect("connected to ap SSID:Wokwi-GUEST")

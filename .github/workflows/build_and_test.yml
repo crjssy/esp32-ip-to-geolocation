@@ -50,11 +50,11 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/**/bootloader/bootloader.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/**/partition_table/partition-table.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/**/*.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/**/*.elf
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/**/flasher_args.json
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/bootloader/bootloader.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/partition_table/partition-table.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.bin
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.elf
+            build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
@@ -77,9 +77,10 @@ jobs:
         with:
           python-version: '3.9'  # Ensure this matches the Python version needed for your testing
       - name: Download built binaries from build job
-        uses: actions/download-artifact@v3  # Ensure this is the correct version
+        uses: actions/download-artifact@v2  # Ensure this is the correct version
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
+          path: build_${{ matrix.target }}_${{ matrix.idf-branch }}  # This should match the build directory used in the upload step
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
