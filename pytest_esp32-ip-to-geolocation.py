@@ -17,9 +17,12 @@ from pytest_embedded import Dut
 from pathlib import Path
 import os
 
+@pytest.mark.parametrize('config', [
+    'build_esp32_release-v5.0',  # 添加更多配置路径以支持多个测试用例
+], indirect=True)
 @pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
-def test_esp32_ip_to_geolocation(dut: Dut):
-    build_path = os.getenv('BUILD_PATH')
+def test_esp32_ip_to_geolocation(dut: Dut, config):
+    build_path = config
     flasher_args_path = Path(build_path, 'flasher_args.json')
     sdkconfig_path = Path(build_path, 'config/sdkconfig.json')
 
@@ -27,11 +30,7 @@ def test_esp32_ip_to_geolocation(dut: Dut):
     assert flasher_args_path.exists(), f"{flasher_args_path} does not exist"
     assert sdkconfig_path.exists(), f"{sdkconfig_path} does not exist"
 
-    # Your existing test logic
-
-    # Check if the required files exist
-    flasher_args_path = Path('build_esp32_release-v5.0/flasher_args.json')
-    assert flasher_args_path.exists(), "flasher_args.json doesn't exist"
+    # Existing test logic
     print(f"flasher_args.json found at: {flasher_args_path}")
 
     # Start the test
