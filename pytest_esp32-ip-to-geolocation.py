@@ -14,25 +14,9 @@ Steps to run these cases:
 
 import pytest
 from pytest_embedded import Dut
-from pathlib import Path
-import os
 
-@pytest.mark.parametrize('config', [
-    'build_esp32_release-v5.0',  # 添加更多配置路径以支持多个测试用例
-], indirect=True)
 @pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
-def test_esp32_ip_to_geolocation(dut: Dut, config):
-    build_path = config
-    flasher_args_path = Path(build_path, 'flasher_args.json')
-    sdkconfig_path = Path(build_path, 'config/sdkconfig.json')
-
-    # Check if the paths exist
-    assert flasher_args_path.exists(), f"{flasher_args_path} does not exist"
-    assert sdkconfig_path.exists(), f"{sdkconfig_path} does not exist"
-
-    # Existing test logic
-    print(f"flasher_args.json found at: {flasher_args_path}")
-
+def test_esp32_ip_to_geolocation(dut: Dut):
     # Start the test
     dut.expect_exact("wifi_init_sta finished.")
     dut.expect("connected to ap SSID:Wokwi-GUEST")

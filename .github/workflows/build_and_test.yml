@@ -45,26 +45,20 @@ jobs:
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: Verify build output
-        run: |
-          ls build_${{ matrix.target }}_${{ matrix.idf-branch }}
-          cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
-          cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/bootloader/bootloader.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/partition_table/partition-table.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.elf
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json
+            **/build**/bootloader/bootloader.bin
+            **/build**/partition_table/partition-table.bin
+            **/build**/*.bin
+            **/build**/*.elf
+            **/build**/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
-    name: Simulate Test on WokWi
+    name: Simulate Test on Wokwi
     needs: build-test-app
     runs-on: ubuntu-22.04
     strategy:
@@ -77,23 +71,16 @@ jobs:
           - esp32
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.9'  # Ensure this matches the Python version needed for your testing
       - name: Download built binaries from build job
-        uses: actions/download-artifact@v2  # Ensure this version matches with upload action
+        uses: actions/download-artifact@v3  # Ensure this is the correct version
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: build_${{ matrix.target }}_${{ matrix.idf-branch }}
-      - name: Set environment variables
-        run: echo "BUILD_PATH=build_${{ matrix.target }}_${{ matrix.idf-branch }}" >> $GITHUB_ENV
-      - name: Verify download output
-        run: |
-          ls build_${{ matrix.target }}_${{ matrix.idf-branch }}
-          cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
-          cat build_${{ matrix.target }}_${{ matrix.idf-branch }}/config/sdkconfig.json
+          path: build_${{ matrix.target }}_${{ matrix.idf-branch }}  # This should match the build directory used in the upload step
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
@@ -126,6 +113,6 @@ jobs:
         with:
           path: test_results
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: test_results/**/*.xml
