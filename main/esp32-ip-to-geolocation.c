@@ -1,7 +1,7 @@
 #include "esp32-ip-to-geolocation.h"
 #include <string.h>
 
-#define MAX_HTTP_OUTPUT_BUFFER 2048
+#define MAX_HTTP_OUTPUT_BUFFER 8192 // Increased buffer size
 
 #define WIFI_SSID CONFIG_ESP_WIFI_SSID
 #define WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
@@ -151,7 +151,7 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
     case HTTP_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
         break;
-    case HTTP_EVENT_REDIRECT: // 添加对 HTTP_EVENT_REDIRECT 的处理
+    case HTTP_EVENT_REDIRECT:
         ESP_LOGI(TAG, "HTTP_EVENT_REDIRECT");
         break;
     default:
@@ -175,7 +175,7 @@ void http_get_task(void *pvParameters)
     esp_http_client_config_t config = {
         .url = URL,
         .event_handler = http_event_handler,
-        .method = HTTP_METHOD_GET // Ensure this matches the intended method
+        .method = HTTP_METHOD_GET
     };
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -193,7 +193,6 @@ void http_get_task(void *pvParameters)
     }
 
     esp_http_client_cleanup(client);
-    free(output_buffer);
     vTaskDelete(NULL);
 }
 
