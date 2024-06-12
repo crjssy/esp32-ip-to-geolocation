@@ -203,6 +203,9 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
+    // 设置日志级别为调试
+    esp_log_level_set("*", ESP_LOG_DEBUG);
+
     wifi_init_sta();
     xTaskCreate(&http_get_task, "http_get_task", 8192, NULL, 5, NULL);
 }
