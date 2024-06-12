@@ -102,7 +102,7 @@ jobs:
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
-            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1 || true
+            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1 
       - name: Print test output log
         run: cat test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
       - name: Upload Test Logs
