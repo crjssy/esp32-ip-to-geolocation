@@ -44,17 +44,8 @@ jobs:
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} > build_output.log 2>&1
-      - name: Check for flasher_args.json
-        run: |
-          find . -name 'flasher_args.json' -exec cat {} \;
-      - name: Print build output log
-        run: cat build_output.log
-      - name: Upload build output log
-        uses: actions/upload-artifact@v3
-        with:
-          name: build_output_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: build_output.log
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+            idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
@@ -86,21 +77,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'  # Ensure this matches the Python version needed for your testing
-      - name: Install Python packages for PyTest
-        run: pip install pytest pytest-embedded pytest-embedded-idf pytest-embedded-wokwi
-      - name: Install the Wokwi CLI
-        run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Download built binaries from build job
         uses: actions/download-artifact@v2
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: .
-      - name: List files in the current directory
-        run: ls -R
-      - name: Set binary path for pytest
-        run: |
-          BINARY_PATH=$(find . -name 'flasher_args.json' -exec dirname {} \;)
-          echo "BINARY_PATH=$BINARY_PATH"
+      - name: Install the Wokwi CLI
+        run: curl -L https://wokwi.com/ci/install.sh | sh
+      - name: Install Python packages for PyTest
+        run: pip install -r requirements.txt
       - name: Run Test App in Wokwi Simulation
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
@@ -108,9 +92,7 @@ jobs:
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
-            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1
-      - name: Print test output log
-        run: cat test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
+            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
         with:
