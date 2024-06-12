@@ -3,6 +3,9 @@
 
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 
+#define WIFI_SSID CONFIG_ESP_WIFI_SSID
+#define WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
+
 char *output_buffer; // Buffer to store HTTP response
 int output_len;      // Stores number of bytes in output_buffer
 
