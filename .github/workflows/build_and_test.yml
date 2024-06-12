@@ -97,9 +97,6 @@ jobs:
           path: .
       - name: List files in the current directory
         run: ls -R
-      - name: Check for flasher_args.json after download
-        run: |
-          find . -name 'flasher_args.json' -exec cat {} \;
       - name: Set binary path for pytest
         run: |
           BINARY_PATH=$(find . -name 'flasher_args.json' -exec dirname {} \;)
@@ -114,11 +111,6 @@ jobs:
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1
       - name: Print test output log
         run: cat test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
-      - name: Upload Test Logs
-        uses: actions/upload-artifact@v2
-        with:
-          name: test_logs_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
         with:
