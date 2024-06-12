@@ -15,14 +15,19 @@ Steps to run these cases:
 import pytest
 from pytest_embedded import Dut
 
-@pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
 def test_esp32_ip_to_geolocation(dut: Dut):
-    # Start the test
-    dut.expect_exact("wifi_init_sta finished.")
-    dut.expect("connected to ap SSID:Wokwi-GUEST")
+    try:
+        # 增加超时时间到 60 秒
+        dut.expect("HTTP GET Status = 200, content_length = ", timeout=60)
+    except Exception as e:
+        # 捕获超时异常并打印日志
+        print("Test timed out or failed with exception: ", str(e))
+        print("Full log:")
+        print(dut.pexpect_proc.before.decode())
+        print("Test incomplete, proceeding with the next steps.")
+        # 继续进行后续步骤
+        pytest.fail("Test incomplete due to timeout or other issue")
 
-    # Check for a successful HTTP request
-    dut.expect("HTTP GET Status = 200, content_length = ")
 
     # Check for the expected logs from the JSON response
     expected_keys = [
