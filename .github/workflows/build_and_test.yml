@@ -46,6 +46,11 @@ jobs:
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
             idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
+      - name: Upload build output log
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_output_${{ matrix.target }}_${{ matrix.idf-branch }}
+          path: build_output.log
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
@@ -92,7 +97,12 @@ jobs:
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
-            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
+            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1
+      - name: Upload Test Logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_logs_${{ matrix.target }}_${{ matrix.idf-branch }}
+          path: test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
         with:
