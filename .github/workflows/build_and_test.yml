@@ -76,6 +76,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+      - name: Install Python packages for PyTest
+        run: pip install pytest pytest-embedded pytest-embedded-idf pytest-embedded-wokwi
+      - name: Install the Wokwi CLI
+        run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Download built binaries from build job
         uses: actions/download-artifact@v2
         with:
@@ -90,13 +94,10 @@ jobs:
         run: |
           BINARY_PATH=$(find . -name 'flasher_args.json' -exec dirname {} \;)
           echo "BINARY_PATH=$BINARY_PATH"
-      - name: Install Python packages for PyTest
-        run: pip install pytest pytest-embedded pytest-embedded-idf pytest-embedded-wokwi
-      - name: Install the Wokwi CLI
-        run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Run Test App in Wokwi Simulation
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+          BINARY_PATH: ${{ steps.set_binary_path.outputs.BINARY_PATH }}
         run: |
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
