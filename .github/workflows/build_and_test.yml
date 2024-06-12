@@ -44,8 +44,9 @@ jobs:
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
-            idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} > build_output.log 2>&1
+      - name: Print build output log
+        run: cat build_output.log
       - name: Upload build output log
         uses: actions/upload-artifact@v3
         with:
@@ -86,6 +87,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
+          path: .
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
@@ -97,7 +99,9 @@ jobs:
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
-            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1
+            --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml > test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log 2>&1 || true
+      - name: Print test output log
+        run: cat test_output_${{ matrix.target }}_${{ matrix.idf-branch }}.log
       - name: Upload Test Logs
         uses: actions/upload-artifact@v2
         with:
