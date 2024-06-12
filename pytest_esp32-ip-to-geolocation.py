@@ -22,7 +22,7 @@ def test_esp32_ip_to_geolocation(dut: Dut):
     dut.expect("connected to ap SSID:Wokwi-GUEST")
 
     # Check for a successful HTTP request
-    dut.expect("HTTP GET Status = 200, content_length = ")
+    dut.expect("HTTP GET Status = 200, content_length = ",timeout=120)
 
     # Check for the expected logs from the JSON response
     expected_keys = [
