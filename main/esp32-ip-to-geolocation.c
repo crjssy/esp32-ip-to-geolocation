@@ -1,10 +1,7 @@
 #include "esp32-ip-to-geolocation.h"
 #include <string.h>
 
-#define MAX_HTTP_OUTPUT_BUFFER 8192 // Increased buffer size
-
-#define WIFI_SSID CONFIG_ESP_WIFI_SSID
-#define WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
+#define MAX_HTTP_OUTPUT_BUFFER 8192 
 
 char *output_buffer; // Buffer to store HTTP response
 int output_len;      // Stores number of bytes in output_buffer
