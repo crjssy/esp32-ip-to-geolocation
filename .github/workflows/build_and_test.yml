@@ -37,14 +37,15 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
-      - name: Generate sdkconfig file
-        run: |
-          . $IDF_PATH/export.sh
-          idf.py menuconfig  # This step is optional and can be used to generate or customize sdkconfig
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
-          idf.py -DSDKCONFIG=$GITHUB_WORKSPACE/sdkconfig build > build_output.log 2>&1
+          idf-build-apps build \
+            -p ${{ env.test_dirs }} \
+            --target ${{ matrix.target }} \
+            --recursive \
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+          idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
@@ -56,14 +57,9 @@ jobs:
             **/build**/*.elf
             **/build**/flasher_args.json
           if-no-files-found: error
-      - name: Upload Build Logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: build_logs_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: build_output.log
 
   simulate-test:
-    name: Simulate Test on Wokwi
+    name: Simulate Test on WokWi
     needs: build-test-app
     runs-on: ubuntu-22.04
     strategy:
@@ -80,19 +76,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.9'  # Ensure this matches the Python version needed for your testing
       - name: Download built binaries from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: build_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
-        env:
-          PIP_PREFER_BINARY: true
-          PIP_INDEX_URL: "https://dl.espressif.com/pypi/"
-          PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
         run: pip install -r requirements.txt
       - name: Run Test App in Wokwi Simulation
         env:
@@ -103,7 +94,7 @@ jobs:
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
           path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
@@ -111,13 +102,13 @@ jobs:
   publish-results:
     name: Publish Test App results
     needs: simulate-test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Download Test results
         uses: actions/download-artifact@v3
         with:
           path: test_results
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           files: test_results/**/*.xml
