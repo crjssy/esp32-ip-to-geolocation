@@ -45,6 +45,9 @@ jobs:
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} > build_output.log 2>&1
+      - name: Check for flasher_args.json
+        run: |
+          find . -name 'flasher_args.json' -exec cat {} \;
       - name: Print build output log
         run: cat build_output.log
       - name: Upload build output log
@@ -88,6 +91,11 @@ jobs:
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: .
+      - name: List files in the current directory
+        run: ls -R
+      - name: Check for flasher_args.json after download
+        run: |
+          find . -name 'flasher_args.json' -exec cat {} \;
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
