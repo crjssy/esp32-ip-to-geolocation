@@ -92,7 +92,7 @@ jobs:
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
         run: |
-          pytest ${{ env.test_dirs }} \
+          pytest ${PWD} \
             --embedded-services idf,wokwi \
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
