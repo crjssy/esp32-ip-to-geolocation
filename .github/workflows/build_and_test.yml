@@ -41,7 +41,7 @@ jobs:
         with:
           esp_idf_version: ${{ matrix.idf-branch }}
           target: ${{ matrix.espidf_target }}
-          path: 'test_app'
+          path: 'main'
           build_dir: build_${{ matrix.espidf_target }}_${{ matrix.idf-branch }}
 
       - name: Upload files to artifacts for run-target job
