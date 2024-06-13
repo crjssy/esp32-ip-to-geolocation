@@ -26,35 +26,28 @@ jobs:
         idf-branch:
           - release-v5.0
           - release-v5.1
-        target:
+        espidf_target:
           - esp32
     runs-on: ubuntu-22.04
-    container:
-      image: espressif/idf:${{ matrix.idf-branch }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install Python Dependencies
-        run: |
-          . $IDF_PATH/export.sh
-          python -m pip install idf-build-apps
+
       - name: Generate sdkconfig file
         run: |
-          . $IDF_PATH/export.sh
           cp sdkconfig.defaults sdkconfig
-          idf.py defconfig
-          idf.py menuconfig  
+
       - name: Build Test Application with ESP-IDF
-        run: |
-          . $IDF_PATH/export.sh
-          idf-build-apps build \
-            -p ${{ env.test_dirs }} \
-            --target ${{ matrix.target }} \
-            --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf-branch }}
+          target: ${{ matrix.espidf_target }}
+          path: 'test_app'
+          build_dir: build_${{ matrix.espidf_target }}_${{ matrix.idf-branch }}
+
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
-          name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
+          name: built_binaries_${{ matrix.espidf_target }}_${{ matrix.idf-branch }}
           path: |
             **/build**/bootloader/bootloader.bin
             **/build**/partition_table/partition-table.bin
@@ -62,6 +55,7 @@ jobs:
             **/build**/*.elf
             **/build**/flasher_args.json
           if-no-files-found: error
+
 
   simulate-test:
     name: Simulate Test on WokWi
