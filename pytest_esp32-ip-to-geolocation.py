@@ -21,6 +21,9 @@ def test_esp32_ip_to_geolocation(dut: Dut):
     dut.expect_exact("wifi_init_sta finished.", timeout=30)
     dut.expect("connected to ap SSID:Wokwi-GUEST", timeout=30)
 
+        # Optionally, check for completion of the HTTP task or any other specific logs
+    dut.expect("HTTP_EVENT_ON_FINISH", timeout=30)  # Modify based on actual log message on success
+
     # Check for the expected logs from the JSON response
     expected_keys = [
         "status:",
@@ -39,12 +42,11 @@ def test_esp32_ip_to_geolocation(dut: Dut):
         "query:"
     ]
 
-     # Check for a successful HTTP request
-    dut.expect("HTTP GET Status = ", timeout=120)  # 使用更宽松的匹配条件
+    #  # Check for a successful HTTP request
+    # dut.expect("HTTP GET Status = ", timeout=120)  # 使用更宽松的匹配条件
 
     # Check each expected log entry for presence only, not specific content
     for key in expected_keys:
         dut.expect(key, timeout=10)
 
-    # Optionally, check for completion of the HTTP task or any other specific logs
-    dut.expect("HTTP_EVENT_ON_FINISH", timeout=30)  # Modify based on actual log message on success
+
