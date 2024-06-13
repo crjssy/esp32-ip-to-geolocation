@@ -37,9 +37,6 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           python -m pip install idf-build-apps
-      - name: Generate sdkconfig file
-        run: |
-          cp sdkconfig.defaults sdkconfig
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
@@ -48,16 +45,17 @@ jobs:
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+            idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/bootloader/bootloader.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/partition_table/partition-table.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.bin
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/*.elf
-            build_${{ matrix.target }}_${{ matrix.idf-branch }}/flasher_args.json
+            **/build**/bootloader/bootloader.bin
+            **/build**/partition_table/partition-table.bin
+            **/build**/*.bin
+            **/build**/*.elf
+            **/build**/flasher_args.json
           if-no-files-found: error
 
   simulate-test:
@@ -83,7 +81,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: .
       - name: Install the Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
       - name: Install Python packages for PyTest
@@ -92,12 +89,12 @@ jobs:
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
         run: |
-          pytest ${PWD} \
+          pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
           path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
