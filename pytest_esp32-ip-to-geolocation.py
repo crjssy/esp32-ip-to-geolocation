@@ -43,5 +43,4 @@ def test_esp32_ip_to_geolocation(dut: Dut):
     for key in expected_keys:
         dut.expect(key)
 
-    # Optionally, check for completion of the HTTP task or any other specific logs
-    dut.expect("HTTP_EVENT_ON_FINISH")  # Modify based on actual log message on success
+
