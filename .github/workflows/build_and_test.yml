@@ -44,7 +44,8 @@ jobs:
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
-            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
+            --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} \
+            -C ${GITHUB_WORKSPACE}/build/config
       - name: Upload files to artifacts for run-target job
         uses: actions/upload-artifact@v3
         with:
