@@ -180,9 +180,9 @@ void http_get_task(void *pvParameters)
 
     if (err == ESP_OK)
     {
-        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
-                 esp_http_client_get_status_code(client),
-                 esp_http_client_get_content_length(client));
+        int status = esp_http_client_get_status_code(client);
+        int content_length = esp_http_client_get_content_length(client);
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status, content_length);
     }
     else
     {
