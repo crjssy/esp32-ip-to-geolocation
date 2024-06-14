@@ -47,7 +47,7 @@ jobs:
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
             idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Upload files to artifacts for run-target job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
@@ -78,7 +78,7 @@ jobs:
         with:
           python-version: '3.9'  # Ensure this matches the Python version needed for your testing
       - name: Download built binaries from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
       - name: Install the Wokwi CLI
