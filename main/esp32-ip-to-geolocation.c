@@ -196,6 +196,7 @@ void http_get_task(void *pvParameters)
     esp_http_client_config_t config = {
         .url = URL,
         .event_handler = http_event_handler,
+        .timeout_ms = 10000, 
         .method = HTTP_METHOD_GET
     };
 
