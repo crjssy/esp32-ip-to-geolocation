@@ -11,6 +11,8 @@
 #include "esp_http_client.h"
 #include "cJSON.h"
 #include "nvs_flash.h"
+#include "sdkconfig.h"
+#include "driver-gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
