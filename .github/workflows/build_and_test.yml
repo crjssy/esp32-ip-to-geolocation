@@ -47,7 +47,7 @@ jobs:
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }}
             idf.py -DSDKCONFIG=/__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig build > build_output.log 2>&1
       - name: Upload files to artifacts for run-target job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
           path: |
@@ -74,7 +74,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'  # Ensure this matches the Python version needed for your testing
       - name: Download built binaries from build job
@@ -94,7 +94,7 @@ jobs:
             --tb short \
             --junit-xml test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
           name: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}_junit
           path: test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
@@ -109,6 +109,6 @@ jobs:
         with:
           path: test_results
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           files: test_results/**/*.xml
