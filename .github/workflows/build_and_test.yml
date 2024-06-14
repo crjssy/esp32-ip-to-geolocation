@@ -101,6 +101,9 @@ jobs:
           path: |
             test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
             serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}.txt
+      - name: Print Serial Output if Test Fails
+        if: failure()
+        run: cat serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}.txt
 
   publish-results:
     name: Publish Test App results
