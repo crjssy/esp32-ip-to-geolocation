@@ -101,12 +101,6 @@ jobs:
           path: |
             test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
             serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}.txt
-      - name: Upload Full Logs if Test Fails
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: full_serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}
-          path: serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}.txt
 
   publish-results:
     name: Publish Test App results
