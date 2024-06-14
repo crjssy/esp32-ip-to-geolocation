@@ -18,10 +18,10 @@ from pytest_embedded import Dut
 @pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
 def test_esp32_ip_to_geolocation(dut: Dut):
     # Start the test
-    dut.expect_exact("wifi_init_sta finished.", timeout=120)
-    dut.expect("connected to ap SSID:Wokwi-GUEST", timeout=30)
+    dut.expect_exact("wifi_init_sta finished.")
+    dut.expect("connected to ap SSID:Wokwi-GUEST")
 
-    dut.expect("HTTP_EVENT_ON_FINISH", timeout=30)  
+    dut.expect("HTTP_EVENT_ON_FINISH")  
 
     # Check for the expected logs from the JSON response
     expected_keys = [
@@ -41,6 +41,6 @@ def test_esp32_ip_to_geolocation(dut: Dut):
 
     # Check each expected log entry for presence only, not specific content
     for key in expected_keys:
-        dut.expect(key, timeout=10)
+        dut.expect(key)
 
 
