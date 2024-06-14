@@ -78,6 +78,9 @@ void wifi_init_sta(void)
 
 esp_err_t http_event_handler(esp_http_client_event_t *evt)
 {
+    static char *output_buffer = NULL; // Ensure this is defined outside the function or as a static variable
+    static int output_len = 0; // Ensure this is defined outside the function or as a static variable
+
     switch (evt->event_id)
     {
     case HTTP_EVENT_ERROR:
@@ -96,24 +99,42 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
         ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
         if (evt->data_len > 0)
         {
-            if (output_len + evt->data_len < MAX_HTTP_OUTPUT_BUFFER)
+            if (output_buffer == NULL)
             {
-                memcpy(output_buffer + output_len, evt->data, evt->data_len);
-                output_len += evt->data_len;
+                // Allocate memory for the output buffer
+                output_buffer = (char *)malloc(evt->data_len + 1);
+                if (output_buffer == NULL)
+                {
+                    ESP_LOGE(TAG, "Failed to allocate memory for output buffer");
+                    return ESP_FAIL;
+                }
+                output_len = 0;
             }
             else
             {
-                ESP_LOGE(TAG, "Buffer overflow");
+                // Reallocate memory for the output buffer to accommodate new data
+                char *new_buffer = (char *)realloc(output_buffer, output_len + evt->data_len + 1);
+                if (new_buffer == NULL)
+                {
+                    ESP_LOGE(TAG, "Failed to reallocate memory for output buffer");
+                    free(output_buffer);
+                    output_buffer = NULL;
+                    output_len = 0;
+                    return ESP_FAIL;
+                }
+                output_buffer = new_buffer;
             }
+
+            // Copy the new data into the buffer
+            memcpy(output_buffer + output_len, evt->data, evt->data_len);
+            output_len += evt->data_len;
+            output_buffer[output_len] = '\0'; // Null-terminate the buffer
         }
         break;
     case HTTP_EVENT_ON_FINISH:
         ESP_LOGI(TAG, "HTTP_EVENT_ON_FINISH");
         if (output_buffer != NULL)
         {
-            // Ensure the buffer is null-terminated
-            output_buffer[output_len] = '\0';
-
             // Parse the JSON data
             cJSON *json = cJSON_Parse(output_buffer);
             if (json == NULL)
@@ -141,12 +162,20 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
 
                 cJSON_Delete(json);
             }
-            // Reset the buffer
+            // Free the output buffer
+            free(output_buffer);
+            output_buffer = NULL;
             output_len = 0;
         }
         break;
     case HTTP_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+        if (output_buffer != NULL)
+        {
+            free(output_buffer);
+            output_buffer = NULL;
+            output_len = 0;
+        }
         break;
     case HTTP_EVENT_REDIRECT:
         ESP_LOGI(TAG, "HTTP_EVENT_REDIRECT");
@@ -160,14 +189,8 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
 
 void http_get_task(void *pvParameters)
 {
-    output_buffer = (char *)malloc(MAX_HTTP_OUTPUT_BUFFER);
-    if (output_buffer == NULL)
-    {
-        ESP_LOGE(TAG, "Cannot malloc http receive buffer");
-        vTaskDelete(NULL);
-        return;
-    }
-    output_len = 0;
+    char *output_buffer = NULL;
+    int output_len = 0;
 
     esp_http_client_config_t config = {
         .url = URL,
@@ -190,8 +213,15 @@ void http_get_task(void *pvParameters)
     }
 
     esp_http_client_cleanup(client);
+
+    // Free the output buffer if it was allocated
+    if (output_buffer != NULL)
+    {
+        free(output_buffer);
+    }
     vTaskDelete(NULL);
 }
+
 
 void app_main()
 {
