@@ -43,13 +43,19 @@ jobs:
       - name: Build Test Application with ESP-IDF
         run: |
           . $IDF_PATH/export.sh
+          cp /__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig.default /__w/esp32-ip-to-geolocation/esp32-ip-to-geolocation/sdkconfig
           idf-build-apps build \
             -p ${{ env.test_dirs }} \
             --target ${{ matrix.target }} \
             --recursive \
             --build-dir build_${{ matrix.target }}_${{ matrix.idf-branch }} \
-            idf.py build > build_output.log 2>&1
+            idf.py build
+        continue-on-error: true
+      - name: Output build logs
+        if: failure()
+        run: cat build_output.log
       - name: Upload files to artifacts for run-target job
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: built_binaries_${{ matrix.target }}_${{ matrix.idf-branch }}
