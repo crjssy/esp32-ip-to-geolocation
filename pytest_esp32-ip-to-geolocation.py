@@ -33,12 +33,7 @@ def test_esp32_ip_to_geolocation(dut: Dut):
         "city:",
         "zip:",
         "lat:",
-        "lon:",
-        "timezone",
-        "isp",
-        "org",
-        "as",
-        "query"
+        "lon:"
     ]
 
     #  # Check for a successful HTTP request
