@@ -32,7 +32,7 @@ jobs:
     container:
       image: espressif/idf:${{ matrix.idf-branch }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Python Dependencies
         run: |
           . $IDF_PATH/export.sh
@@ -72,7 +72,7 @@ jobs:
           - esp32
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
