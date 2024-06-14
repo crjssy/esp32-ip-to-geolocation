@@ -76,11 +76,11 @@ void wifi_init_sta(void)
     }
 }
 
+static char *output_buffer = NULL;
+static int output_len = 0;
+
 esp_err_t http_event_handler(esp_http_client_event_t *evt)
 {
-    static char *output_buffer = NULL; // Ensure this is defined outside the function or as a static variable
-    static int output_len = 0; // Ensure this is defined outside the function or as a static variable
-
     switch (evt->event_id)
     {
     case HTTP_EVENT_ERROR:
@@ -189,8 +189,8 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
 
 void http_get_task(void *pvParameters)
 {
-    char *output_buffer = NULL;
-    int output_len = 0;
+    output_buffer = NULL;
+    output_len = 0;
 
     esp_http_client_config_t config = {
         .url = URL,
@@ -218,9 +218,12 @@ void http_get_task(void *pvParameters)
     if (output_buffer != NULL)
     {
         free(output_buffer);
+        output_buffer = NULL;
+        output_len = 0;
     }
     vTaskDelete(NULL);
 }
+
 
 
 void app_main()
