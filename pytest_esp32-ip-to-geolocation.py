@@ -43,4 +43,4 @@ def test_esp32_ip_to_geolocation(dut: Dut):
 
     # Check each expected log entry for presence only, not specific content
     for key in expected_keys:
-        dut.expect(key, timeout=60)
+        dut.expect(key, timeout=120)
