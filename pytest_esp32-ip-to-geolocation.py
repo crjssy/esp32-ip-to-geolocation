@@ -15,13 +15,13 @@ Steps to run these cases:
 import pytest
 from pytest_embedded import Dut
 
-@pytest.mark.supported_targets("esp32")  # Specify the target, esp32 in this case
+@pytest.mark.supported_targets("esp32")
 def test_esp32_ip_to_geolocation(dut: Dut):
     # Start the test
-    dut.expect_exact("wifi_init_sta finished.")
-    dut.expect("connected to ap SSID:Wokwi-GUEST")
+    dut.expect_exact("wifi_init_sta finished.", timeout=60)
+    dut.expect("connected to ap SSID:Wokwi-GUEST", timeout=60)
 
-    dut.expect("HTTP_EVENT_ON_FINISH")  
+    dut.expect("HTTP_EVENT_ON_FINISH", timeout=60)
 
     # Check for the expected logs from the JSON response
     expected_keys = [
@@ -41,11 +41,6 @@ def test_esp32_ip_to_geolocation(dut: Dut):
         "query"
     ]
 
-    #  # Check for a successful HTTP request
-    # dut.expect("HTTP GET Status = ", timeout=120)  
-
     # Check each expected log entry for presence only, not specific content
     for key in expected_keys:
-        dut.expect(key)
-
-
+        dut.expect(key, timeout=60)
