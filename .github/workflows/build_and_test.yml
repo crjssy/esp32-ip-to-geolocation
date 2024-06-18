@@ -91,6 +91,7 @@ jobs:
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
         run: |
+          wokwi-cli --interactive ${{ env.test_dirs }} --timeout 86400000 > wokwi_output.log 2>&1
           pytest ${{ env.test_dirs }} \
             --embedded-services idf,wokwi \
             --tb short \
@@ -103,6 +104,7 @@ jobs:
           path: |
             test_wokwi_${{ matrix.target }}_${{ matrix.idf-branch }}.xml
             serial_output_${{ matrix.target }}_${{ matrix.idf-branch }}.txt
+            wokwi_output.log
 
   publish-results:
     name: Publish Test App results
