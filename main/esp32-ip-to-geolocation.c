@@ -76,7 +76,6 @@ void wifi_init_sta(void)
     }
 }
 
-// 全局变量声明
 char *output_buffer = NULL; // Buffer to store HTTP response
 int output_len = 0; // Stores number of bytes in output_buffer
 
@@ -236,7 +235,6 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
-    // 设置日志级别为调试
     esp_log_level_set("*", ESP_LOG_DEBUG);
 
     wifi_init_sta();
