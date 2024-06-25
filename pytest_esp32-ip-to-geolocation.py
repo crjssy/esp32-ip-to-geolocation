@@ -33,7 +33,12 @@ def test_esp32_ip_to_geolocation(dut: Dut):
         "city:",
         "zip:",
         "lat:",
-        "lon:"
+        "lon:",
+        "timezone",
+        "isp",
+        "org",
+        "as",
+        "query"
     ]
 
     # Check each expected log entry for presence only, not specific content
